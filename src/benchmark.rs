@@ -38,7 +38,8 @@ pub fn extract_criterion_mean_ns(path: impl AsRef<Path>) -> Result<f64, String> 
 /// ```
 /// use reproducible::benchmark::criterion_estimates_path;
 /// let path = criterion_estimates_path("target/criterion", "math/ellip").unwrap();
-/// assert!(path.to_str().unwrap().contains("math/ellip/new/estimates.json"));
+/// let expected = std::path::Path::new("math").join("ellip").join("new").join("estimates.json");
+/// assert!(path.ends_with(expected));
 /// ```
 pub fn criterion_estimates_path(
     criterion_root: impl AsRef<Path>,
