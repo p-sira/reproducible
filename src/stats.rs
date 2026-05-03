@@ -96,7 +96,7 @@ impl Stats {
         valids.sort_by(|a, b| a.partial_cmp(b).expect("finite values are comparable"));
         let n = valids.len();
         let mean = valids.iter().sum::<f64>() / n as f64;
-        let median = if n % 2 == 0 {
+        let median = if n.is_multiple_of(2) {
             (valids[n / 2 - 1] + valids[n / 2]) / 2.0
         } else {
             valids[n / 2]

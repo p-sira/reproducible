@@ -4,12 +4,15 @@ use crate::benchmark::default_criterion_root;
 use crate::parser::{CsvParserOptions, read_accuracy_cases_csv};
 use serde::{Deserialize, Serialize};
 
+/// A function that a row evaluates.
+pub type RowFunction<T> = Box<dyn Fn(&[T]) -> Vec<T> + Send + Sync>;
+
 /// A single test row in a report.
 pub struct Row<T = f64> {
     /// Identifying name for the row (e.g., function name).
     pub name: String,
     /// Optional function to evaluate for this row.
-    pub function: Option<Box<dyn Fn(&[T]) -> Vec<T> + Send + Sync>>,
+    pub function: Option<RowFunction<T>>,
     pub test_cases: Option<Vec<TestCase<T>>>,
     criterion_root: Option<PathBuf>,
     criterion_id: Option<String>,
@@ -116,4 +119,3 @@ pub struct TestCase<T = f64> {
     pub inputs: Vec<T>,
     pub expected: Vec<T>,
 }
-
