@@ -4,10 +4,7 @@ version = "0.1.0"
 edition = "2024"
 description = "Procedural macros for the `reproducible` crate"
 license = "BSD-3-Clause"
-
-homepage.workspace = true
-repository.workspace = true
-documentation.workspace = true
+repository = "https://github.com/p-sira/reproducible"
 
 [lib]
 proc-macro = true
