@@ -7,10 +7,16 @@
 //! use reproducible::prelude::*;
 //! use reproducible::metrics;
 //!
+//! // 1. Define the functions we want to evaluate
+//!
 //! let fn_add = |inputs: &[f64]| vec![inputs[0] + inputs[1] + 5.0 * f64::EPSILON];
 //! let fn_sub = |inputs: &[f64]| vec![inputs[0] - inputs[1] - 10.0 * f64::EPSILON];
 //!
+//! // 2. Compose the report
+//!
 //! let report = Report::new()
+//!
+//!     // Add columns for metrics and statistics
 //!     .with_column(
 //!         Column::<f64>::accuracy("Mean Relative Error (eps)")
 //!             .with_metric(metrics::rel_err_eps)
@@ -21,12 +27,16 @@
 //!             .with_stat(ColumnStat::Max)
 //!     )
 //!     .with_column(Column::<f64>::perf("Latency"))
+//!
+//!     // Add rows corresponding to each function you want to evaluate
 //!     .with_row(Row::new("math/add", fn_add).with_test_cases(vec![
 //!         TestCase { inputs: vec![1.0, 2.0], expected: vec![3.0] },
 //!     ]))
 //!     .with_row(Row::new("math/sub", fn_sub).with_test_cases(vec![
 //!         TestCase { inputs: vec![1.0, 2.0], expected: vec![-1.0] },
 //!     ]));
+//!
+//! // 3. Render to Markdown
 //!
 //! println!("{}", report.render_markdown());
 //! # assert!(report.render_markdown() == "| Function | Mean Relative Error (eps) | Max Absolute Error | Latency |\n|----------|---------------------------|--------------------|---------|\n| math/add | 1.33                      | 8.88e-16           | 9.3 ns  |\n| math/sub | 10.00                     | 2.22e-15           | 9.7 ns  |");

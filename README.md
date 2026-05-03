@@ -35,10 +35,16 @@ cargo add reproducible
 use reproducible::prelude::*;
 use reproducible::metrics;
 
+// 1. Define the functions we want to evaluate
+
 let fn_add = |inputs: &[f64]| vec![inputs[0] + inputs[1] + 5.0 * f64::EPSILON];
 let fn_sub = |inputs: &[f64]| vec![inputs[0] - inputs[1] - 10.0 * f64::EPSILON];
 
+// 2. Compose the report
+
 let report = Report::new()
+
+    // Add columns for metrics and statistics
     .with_column(
         Column::<f64>::accuracy("Mean Relative Error (eps)")
             .with_metric(metrics::rel_err_eps)
@@ -49,6 +55,8 @@ let report = Report::new()
             .with_stat(ColumnStat::Max)
     )
     .with_column(Column::<f64>::perf("Latency"))
+    
+    // Add rows corresponding to each function you want to evaluate
     .with_row(Row::new("math/add", fn_add).with_test_cases(vec![
         TestCase { inputs: vec![1.0, 2.0], expected: vec![3.0] },
     ]))
