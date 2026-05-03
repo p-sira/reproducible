@@ -11,6 +11,9 @@ categories = ["development-tools::testing", "development-tools::profiling"]
 [workspace]
 members = ["reproducible-macros"]
 
+[workspace.dependencies]
+reproducible-macros = { version = "0.1", path = "reproducible-macros" }
+
 [features]
 default = ["macros"]
 macros = ["dep:reproducible-macros"]
@@ -23,7 +26,7 @@ num-traits = "0.2.19"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tabled = "0.18"
-reproducible-macros = { path = "reproducible-macros", optional = true }
+reproducible-macros = { workspace = true, optional = true }
 
 [dev-dependencies]
 tempfile = "3"
