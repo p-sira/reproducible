@@ -59,6 +59,11 @@ impl<T> Report<T> {
         self
     }
 
+    pub fn with_float_precision(mut self, precision: usize) -> Self {
+        self.set_float_precision(precision);
+        self
+    }
+
     pub fn with_error_unit(mut self, unit: impl Into<String>) -> Self {
         self.set_error_unit(unit.into());
         self
