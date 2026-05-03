@@ -3,7 +3,7 @@
 use crate::columns::{Column, ColumnStat};
 use crate::report::Report;
 use crate::stats::Stats;
-use getset::Setters;
+use getset::{Setters, WithSetters};
 use tabled::builder::Builder;
 use tabled::settings::Style;
 
@@ -23,8 +23,8 @@ pub enum TableStyle {
 }
 
 /// Optional rendering configuration.
-#[derive(Debug, Clone, Setters)]
-#[getset(set = "pub")]
+#[derive(Debug, Clone, Setters, WithSetters)]
+#[getset(set = "pub", set_with = "pub")]
 pub struct RenderConfig {
     /// Number of decimal places to show.
     pub float_precision: usize,
