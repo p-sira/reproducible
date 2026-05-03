@@ -91,7 +91,6 @@ impl<T> Report<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::row;
     use crate::{columns::ColumnStat, rows::Row};
 
     #[test]
@@ -137,7 +136,7 @@ mod tests {
     #[test]
     fn test_row_macro() {
         let my_func = |i: &[f64]| vec![i[0]];
-        let report = Report::new().with_row(row!(my_func));
+        let report = Report::new().with_row(Row::new("my_func", my_func));
 
         assert_eq!(report.rows()[0].name, "my_func");
     }
