@@ -5,6 +5,7 @@
 ### Breaking changes
 
 - `with_test_cases_from_csv` and `with_test_cases_from_separate_csvs` have been renamed to `with_csv_cases` and `with_split_csv_cases`, respectively.
+- Support batch functions to evaluate all test cases altogether. Use `Row::new_batch` instead of `Row::new`.
 
 # 0.1.0
 

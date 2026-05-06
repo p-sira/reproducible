@@ -88,7 +88,10 @@ impl<T> Report<T> {
     }
 
     /// Render the report using the current dynamic column configuration.
-    pub fn render_markdown(&self) -> String {
+    pub fn render_markdown(&self) -> String
+    where
+        T: Clone,
+    {
         render_dynamic_markdown(self)
     }
 }
