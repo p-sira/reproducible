@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use crate::benchmark::default_criterion_root;
-use crate::parser::{CsvParserOptions, read_accuracy_cases_csv};
+use crate::parser::CsvParserOptions;
 use serde::{Deserialize, Serialize};
 
 /// A function that a row evaluates.
@@ -53,12 +53,33 @@ impl<T> Row<T> {
     }
 
     #[inline]
-    pub fn with_test_cases_from_csv(mut self, path: impl AsRef<Path>) -> std::io::Result<Self>
+    pub fn with_csv_cases(mut self, path: impl AsRef<Path>) -> std::io::Result<Self>
     where
         T: std::str::FromStr + Clone,
         <T as std::str::FromStr>::Err: std::fmt::Display,
     {
-        self.test_cases = Some(read_accuracy_cases_csv(path, &CsvParserOptions::default())?);
+        self.test_cases = Some(crate::parser::read_csv_cases(
+            path,
+            &CsvParserOptions::default(),
+        )?);
+        Ok(self)
+    }
+
+    #[inline]
+    pub fn with_split_csv_cases(
+        mut self,
+        inputs_path: impl AsRef<Path>,
+        expected_path: impl AsRef<Path>,
+    ) -> std::io::Result<Self>
+    where
+        T: std::str::FromStr + Clone,
+        <T as std::str::FromStr>::Err: std::fmt::Display,
+    {
+        self.test_cases = Some(crate::parser::read_split_csv_cases(
+            inputs_path,
+            expected_path,
+            &CsvParserOptions::default(),
+        )?);
         Ok(self)
     }
 

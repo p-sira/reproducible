@@ -1,4 +1,4 @@
-use reproducible::parser::{CsvParserOptions, read_accuracy_cases_csv};
+use reproducible::parser::{CsvParserOptions, read_csv_cases};
 use reproducible::prelude::*;
 
 fn main() {
@@ -6,7 +6,7 @@ fn main() {
     // The CSV should have columns like: x, y, expected
     // read_accuracy_cases_csv assumes the last column is the expected result.
     let csv_path = "examples/data/cases.csv";
-    let test_cases = read_accuracy_cases_csv::<f64>(csv_path, &CsvParserOptions::default())
+    let test_cases = read_csv_cases::<f64>(csv_path, &CsvParserOptions::default())
         .expect("Failed to load CSV");
 
     println!("Loaded {} test cases from {}\n", test_cases.len(), csv_path);
