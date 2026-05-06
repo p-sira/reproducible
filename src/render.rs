@@ -98,7 +98,7 @@ fn get_stat_val(stats: &Stats, stat: ColumnStat) -> f64 {
 }
 
 /// Dynamic markdown renderer using the declarative Report structure.
-pub fn render_dynamic_markdown<T>(report: &Report<T>) -> String {
+pub fn render_dynamic_markdown<T: Clone>(report: &Report<T>) -> String {
     let mut builder = Builder::default();
     let cfg = report.render_config();
 
@@ -119,7 +119,11 @@ pub fn render_dynamic_markdown<T>(report: &Report<T>) -> String {
         let mut row_data = vec![row.name.clone()];
 
         // Materialize evaluation results for this row if it has a function
-        let cached_results: Option<Vec<Vec<T>>> = if let Some(func) = &row.function {
+        let cached_results: Option<Vec<Vec<T>>> = if let Some(batch_func) = &row.batch_function {
+            let cases = row.test_cases.as_ref().unwrap_or(report.test_cases());
+            let inputs: Vec<Vec<T>> = cases.iter().map(|c| c.inputs.clone()).collect();
+            Some(batch_func(&inputs))
+        } else if let Some(func) = &row.function {
             let cases = row.test_cases.as_ref().unwrap_or(report.test_cases());
             Some(cases.iter().map(|c| func(&c.inputs)).collect())
         } else {
@@ -129,22 +133,28 @@ pub fn render_dynamic_markdown<T>(report: &Report<T>) -> String {
         for col in report.columns() {
             let val = match col {
                 Column::Accuracy(ac) => {
-                    if let (Some(cached), Some(_func)) = (&cached_results, &row.function) {
-                        let cases = row.test_cases.as_ref().unwrap_or(report.test_cases());
-                        let metric = ac.metric.as_deref().unwrap_or(report.default_metric_ref());
+                    if let Some(cached) = &cached_results {
+                        if row.function.is_none() && row.batch_function.is_none() {
+                            "N/A".to_string()
+                        } else {
+                            let cases = row.test_cases.as_ref().unwrap_or(report.test_cases());
+                            let metric =
+                                ac.metric.as_deref().unwrap_or(report.default_metric_ref());
 
-                        let results: Vec<crate::metrics::MetricValue> = cached
-                            .iter()
-                            .zip(cases.iter())
-                            .map(|(actual, c)| metric(actual, &c.expected))
-                            .collect();
+                            let results: Vec<crate::metrics::MetricValue> = cached
+                                .iter()
+                                .zip(cases.iter())
+                                .map(|(actual, c)| metric(actual, &c.expected))
+                                .collect();
 
-                        let stats = Stats::from_metric_values(&results);
-                        match stats {
-                            Stats::Numerical(ns) => {
-                                fmt_float(get_stat_val(&Stats::Numerical(ns), ac.target_stat), cfg)
+                            let stats = Stats::from_metric_values(&results);
+                            match stats {
+                                Stats::Numerical(ns) => fmt_float(
+                                    get_stat_val(&Stats::Numerical(ns), ac.target_stat),
+                                    cfg,
+                                ),
+                                Stats::Categorical(cs) => format_categorical(&cs),
                             }
-                            Stats::Categorical(cs) => format_categorical(&cs),
                         }
                     } else {
                         "N/A".to_string()
@@ -159,15 +169,21 @@ pub fn render_dynamic_markdown<T>(report: &Report<T>) -> String {
                     fmt_time_ns(mean_ns)
                 }
                 Column::Custom(_, f) => {
-                    if let (Some(cached), Some(_func)) = (&cached_results, &row.function) {
-                        let cases = row.test_cases.as_ref().unwrap_or(report.test_cases());
-                        let results: Vec<crate::metrics::MetricValue> = cached
-                            .iter()
-                            .zip(cases.iter())
-                            .map(|(actual, c)| (report.default_metric_ref())(actual, &c.expected))
-                            .collect();
-                        let stats = Stats::from_metric_values(&results);
-                        f(&stats)
+                    if let Some(cached) = &cached_results {
+                        if row.function.is_none() && row.batch_function.is_none() {
+                            "N/A".to_string()
+                        } else {
+                            let cases = row.test_cases.as_ref().unwrap_or(report.test_cases());
+                            let results: Vec<crate::metrics::MetricValue> = cached
+                                .iter()
+                                .zip(cases.iter())
+                                .map(|(actual, c)| {
+                                    (report.default_metric_ref())(actual, &c.expected)
+                                })
+                                .collect();
+                            let stats = Stats::from_metric_values(&results);
+                            f(&stats)
+                        }
                     } else {
                         "N/A".to_string()
                     }

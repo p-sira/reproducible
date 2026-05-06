@@ -102,10 +102,10 @@ where
 /// # Example
 ///
 /// ```no_run
-/// use reproducible::parser::{read_accuracy_cases_csv, CsvParserOptions};
-/// let cases = read_accuracy_cases_csv::<f64>("data.csv", &CsvParserOptions::default()).unwrap();
+/// use reproducible::parser::{read_csv_cases, CsvParserOptions};
+/// let cases = read_csv_cases::<f64>("data.csv", &CsvParserOptions::default()).unwrap();
 /// ```
-pub fn read_accuracy_cases_csv<T>(
+pub fn read_csv_cases<T>(
     path: impl AsRef<Path>,
     options: &CsvParserOptions,
 ) -> std::io::Result<Vec<TestCase<T>>>
@@ -166,6 +166,48 @@ where
     Ok(out)
 }
 
+/// Parse accuracy cases from two separate CSV files: one for inputs, one for expected values.
+///
+/// Both files must have the same number of rows. Row `i` in the inputs file corresponds to
+/// row `i` in the expected file.
+///
+/// # Example
+///
+/// ```no_run
+/// use reproducible::parser::{read_split_csv_cases, CsvParserOptions};
+/// let cases = read_split_csv_cases::<f64>("inputs.csv", "expected.csv", &CsvParserOptions::default()).unwrap();
+/// ```
+pub fn read_split_csv_cases<T>(
+    inputs_path: impl AsRef<Path>,
+    expected_path: impl AsRef<Path>,
+    options: &CsvParserOptions,
+) -> std::io::Result<Vec<TestCase<T>>>
+where
+    T: std::str::FromStr,
+    <T as std::str::FromStr>::Err: std::fmt::Display,
+{
+    let inputs_vectors = read_csv_vectors(inputs_path, options)?;
+    let expected_vectors = read_csv_vectors(expected_path, options)?;
+
+    if inputs_vectors.len() != expected_vectors.len() {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidData,
+            format!(
+                "row count mismatch: inputs has {} rows, expected has {} rows",
+                inputs_vectors.len(),
+                expected_vectors.len()
+            ),
+        ));
+    }
+
+    let mut out = Vec::with_capacity(inputs_vectors.len());
+    for (inputs, expected) in inputs_vectors.into_iter().zip(expected_vectors) {
+        out.push(TestCase { inputs, expected });
+    }
+
+    Ok(out)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -177,8 +219,7 @@ mod tests {
         let csv_path = tmp.path().join("cases.csv");
         std::fs::write(&csv_path, "x,y,expected\n1.0,2.0,3.0\n2.0,5.0,7.0\n").expect("write");
 
-        let cases =
-            read_accuracy_cases_csv::<f64>(&csv_path, &CsvParserOptions::default()).expect("parse");
+        let cases = read_csv_cases::<f64>(&csv_path, &CsvParserOptions::default()).expect("parse");
         assert_eq!(cases.len(), 2);
         assert_eq!(cases[0].inputs, vec![1.0, 2.0]);
         assert_eq!(cases[0].expected, vec![3.0]);
@@ -190,8 +231,7 @@ mod tests {
         let csv_path = tmp.path().join("empty.csv");
         std::fs::write(&csv_path, "").expect("write");
 
-        let cases =
-            read_accuracy_cases_csv::<f64>(&csv_path, &CsvParserOptions::default()).expect("parse");
+        let cases = read_csv_cases::<f64>(&csv_path, &CsvParserOptions::default()).expect("parse");
         assert_eq!(cases.len(), 0);
     }
 
@@ -201,8 +241,7 @@ mod tests {
         let csv_path = tmp.path().join("headers.csv");
         std::fs::write(&csv_path, "col1,col2,expected\n").expect("write");
 
-        let cases =
-            read_accuracy_cases_csv::<f64>(&csv_path, &CsvParserOptions::default()).expect("parse");
+        let cases = read_csv_cases::<f64>(&csv_path, &CsvParserOptions::default()).expect("parse");
         assert_eq!(cases.len(), 0);
     }
 
@@ -212,7 +251,7 @@ mod tests {
         let csv_path = tmp.path().join("invalid.csv");
         std::fs::write(&csv_path, "1.0,abc,3.0\n").expect("write");
 
-        let res = read_accuracy_cases_csv::<f64>(
+        let res = read_csv_cases::<f64>(
             &csv_path,
             &CsvParserOptions {
                 has_headers: false,
@@ -237,7 +276,7 @@ mod tests {
             delimiter: b';',
             has_headers: false,
         };
-        let cases = read_accuracy_cases_csv::<f64>(&csv_path, &options).expect("parse");
+        let cases = read_csv_cases::<f64>(&csv_path, &options).expect("parse");
         assert_eq!(cases[0].inputs, vec![1.0, 2.0]);
         assert_eq!(cases[0].expected, vec![3.0]);
     }
@@ -248,7 +287,7 @@ mod tests {
         let csv_path = tmp.path().join("patho.csv");
         std::fs::write(&csv_path, "NaN,inf,-inf,1.0\n").expect("write");
 
-        let cases = read_accuracy_cases_csv::<f64>(
+        let cases = read_csv_cases::<f64>(
             &csv_path,
             &CsvParserOptions {
                 has_headers: false,
@@ -268,7 +307,7 @@ mod tests {
         let csv_path = tmp.path().join("f32.csv");
         std::fs::write(&csv_path, "1.0,2.0\n").expect("write");
 
-        let cases = read_accuracy_cases_csv::<f32>(
+        let cases = read_csv_cases::<f32>(
             &csv_path,
             &CsvParserOptions {
                 has_headers: false,
@@ -278,5 +317,35 @@ mod tests {
         .expect("parse");
         assert_eq!(cases[0].inputs, vec![1.0f32]);
         assert_eq!(cases[0].expected, vec![2.0f32]);
+    }
+
+    #[test]
+    fn test_read_separate_csvs() {
+        let tmp = tempdir().expect("tempdir");
+        let inputs_path = tmp.path().join("inputs.csv");
+        let expected_path = tmp.path().join("expected.csv");
+        std::fs::write(&inputs_path, "x,y\n1.0,2.0\n2.0,5.0\n").expect("write");
+        std::fs::write(&expected_path, "expected\n3.0\n7.0\n").expect("write");
+
+        let cases =
+            read_split_csv_cases::<f64>(&inputs_path, &expected_path, &CsvParserOptions::default())
+                .expect("parse");
+        assert_eq!(cases.len(), 2);
+        assert_eq!(cases[0].inputs, vec![1.0, 2.0]);
+        assert_eq!(cases[0].expected, vec![3.0]);
+    }
+
+    #[test]
+    fn test_read_separate_csvs_mismatch() {
+        let tmp = tempdir().expect("tempdir");
+        let inputs_path = tmp.path().join("inputs.csv");
+        let expected_path = tmp.path().join("expected.csv");
+        std::fs::write(&inputs_path, "x,y\n1.0,2.0\n2.0,5.0\n").expect("write");
+        std::fs::write(&expected_path, "expected\n3.0\n").expect("write");
+
+        let res =
+            read_split_csv_cases::<f64>(&inputs_path, &expected_path, &CsvParserOptions::default());
+        assert!(res.is_err());
+        assert!(res.unwrap_err().to_string().contains("row count mismatch"));
     }
 }
