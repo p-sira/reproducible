@@ -1,9 +1,11 @@
-# 0.2
+# 0.3
 
-## 0.2.1
+## 0.3.0
 
 - `Env`: a struct for extracting and storing environment context for reproducible tests. Also provides `to_string` method.
 - Improve documentation.
+
+# 0.2
 
 ## 0.2.0
 
