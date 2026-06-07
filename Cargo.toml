@@ -1,6 +1,6 @@
 [package]
 name = "reproducible"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 description = "Utilities for reproducible accuracy and benchmark reporting in Rust projects"
 license = "BSD-3-Clause"
