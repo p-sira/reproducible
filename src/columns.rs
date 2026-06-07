@@ -1,3 +1,5 @@
+//! Accuracy and performance columns.
+
 use crate::metrics::{ErrorMetric, MetricValue};
 use serde::{Deserialize, Serialize};
 
@@ -14,7 +16,6 @@ pub enum ColumnStat {
 
 /// A column definition for a report.
 pub enum Column<T = f64> {
-    /// An accuracy column that evaluates error metrics on test cases.
     Accuracy(AccuracyColumn<T>),
     /// A performance column that reads benchmark data from Criterion.
     Performance(PerformanceColumn),
@@ -61,6 +62,7 @@ impl<T> Column<T> {
     }
 }
 
+/// A column that evaluates error metrics on test cases.
 pub struct AccuracyColumn<T = f64> {
     pub name: String,
     pub metric: Option<Box<ErrorMetric<T>>>,
@@ -108,6 +110,7 @@ impl<T> From<AccuracyColumn<T>> for Column<T> {
     }
 }
 
+/// A column that reads benchmark data from Criterion.
 #[derive(Debug)]
 pub struct PerformanceColumn {
     pub name: String,

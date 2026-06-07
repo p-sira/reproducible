@@ -52,7 +52,6 @@
 //!
 //! Tested on AMD Ryzen 5 4600H with Radeon Graphics @2.4 GHz RAM 16 GB running x86_64-unknown-linux-gnu rustc 1.90.0 using reproducible v0.2.0
 //! ```
-//!
 
 extern crate self as reproducible;
 
@@ -66,6 +65,7 @@ pub mod report;
 pub mod rows;
 pub mod stats;
 
+/// Re-exports of commonly used items.
 pub mod prelude {
     pub use crate::columns::{Column, ColumnStat};
     pub use crate::current_env;

@@ -1,3 +1,5 @@
+//! Environment context.
+
 use std::fmt;
 use std::process::Command;
 
@@ -44,6 +46,10 @@ pub struct Env {
 }
 
 #[macro_export]
+/// Create [Env] from the current environment.
+///
+/// This macro automatically populates [Env] with the crate name and version
+/// from the environment.
 macro_rules! current_env {
     () => {
         $crate::env::Env::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
