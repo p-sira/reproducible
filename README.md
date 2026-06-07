@@ -64,7 +64,21 @@ let report = Report::new()
         TestCase { inputs: vec![1.0, 2.0], expected: vec![-1.0] },
     ]));
 
+// 3. Render to Markdown and print the testing environment
+
 println!("{}", report.render_markdown());
+println!("Tested on {}", current_env!());
+```
+
+Output:
+
+```text
+| Function | Mean Relative Error (eps) | Max Absolute Error | Latency |
+|----------|---------------------------|--------------------|---------|
+| math/add | 1.33                      | 8.88e-16           | 9.3 ns  |
+| math/sub | 10.00                     | 2.22e-15           | 9.7 ns  |
+
+Tested on AMD Ryzen 5 4600H with Radeon Graphics @2.4 GHz RAM 16 GB running x86_64-unknown-linux-gnu rustc 1.90.0 using reproducible v0.2.0
 ```
 
 ## Features

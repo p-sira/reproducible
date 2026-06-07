@@ -1,3 +1,5 @@
+//! Rows for the report.
+
 use std::path::{Path, PathBuf};
 
 use crate::benchmark::default_criterion_root;

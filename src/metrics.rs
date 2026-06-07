@@ -1,3 +1,5 @@
+//! Error metrics.
+
 use serde::{Deserialize, Serialize};
 
 /// The result of an error metric evaluation.
@@ -91,6 +93,7 @@ pub fn rel_err_eps(actual: &[f64], expected: &[f64]) -> MetricValue {
     }
 }
 
+/// Computes absolute error between `actual` and `expected`.
 pub fn abs_err(actual: &[f64], expected: &[f64]) -> MetricValue {
     if actual.is_empty() || expected.is_empty() || actual.len() != expected.len() {
         return MetricValue::Numerical(f64::NAN);
