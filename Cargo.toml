@@ -12,7 +12,7 @@ categories = ["development-tools::testing", "development-tools::profiling"]
 members = ["reproducible-macros"]
 
 [workspace.dependencies]
-reproducible-macros = { version = "0.1", path = "reproducible-macros" }
+reproducible-macros = { version = "0.3", path = "reproducible-macros" }
 
 [features]
 default = ["macros"]
