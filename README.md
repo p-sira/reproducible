@@ -1,6 +1,6 @@
 # reproducible
 
-**reproducible** is a Rust library for generating reproducible **accuracy** and **benchmark** reports.
+**reproducible** is a Rust library for generating reproducible **accuracy** and **benchmark** reports, designed to work with any Rust crate, be quick to set up and easy to customize.
 
 <p>
     <a href="https://opensource.org/license/BSD-3-clause" style="text-decoration:none">
@@ -16,12 +16,6 @@
         <img src="https://img.shields.io/badge/Docs-docs.rs-blue" alt="Documentation">
     </a>
 </p>
-
-It is designed to:
-
-- work with any Rust crate (no project-specific assumptions),
-- be quick to set up,
-- stay customizable for advanced workflows.
 
 ## Installation
 
@@ -83,11 +77,12 @@ Tested on AMD Ryzen 5 4600H with Radeon Graphics @2.4 GHz RAM 16 GB running x86_
 
 ## Features
 
-- **Fluent API**: Compose reports with a declarative builder pattern.
+- **Fluent API**: Compose reports with a declarative builder pattern, specifying the rows and columns.
 - **Accuracy Metrics**: Evaluate functions against test cases with built-in or custom metrics.
 - **Criterion Integration**: Automatically pull benchmark results from Criterion's output directory.
 - **CSV Support**: Load test cases directly from CSV files.
 - **Customizable Rendering**: Control precision, scientific notation, and table styles (Markdown, Modern, Sharp, etc.).
+- **Reproducible Environment Context**: Convenience macro `current_env!()` that returns the testing environment information, including CPU, RAM, Rust compiler, and crate version.
 
 ## Examples
 
