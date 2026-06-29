@@ -51,6 +51,7 @@ impl<T> Column<T> {
             name: name.into(),
             metric: None,
             target_stat: ColumnStat::Mean,
+            postprocess: None,
         }
     }
 
@@ -59,6 +60,34 @@ impl<T> Column<T> {
         PerformanceColumn {
             name: name.into(),
             target_stat: ColumnStat::Median,
+            postprocess: None,
+        }
+    }
+
+    /// Add a postprocess function to apply to the numerical value in the column.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use reproducible::columns::Column;
+    /// let col = Column::<f64>::accuracy("Mean L2")
+    ///     .postprocess(|val| val * 100.0); // Convert to percentage
+    /// ```
+    pub fn postprocess<F>(self, f: F) -> Self
+    where
+        F: Fn(f64) -> f64 + Send + Sync + 'static,
+    {
+        let f = std::sync::Arc::new(f);
+        match self {
+            Column::Accuracy(mut ac) => {
+                ac.postprocess = Some(f.clone());
+                Column::Accuracy(ac)
+            }
+            Column::Performance(mut pc) => {
+                pc.postprocess = Some(f.clone());
+                Column::Performance(pc)
+            }
+            Column::Custom(name, func) => Column::Custom(name, func),
         }
     }
 }
@@ -68,6 +97,7 @@ pub struct AccuracyColumn<T = f64> {
     pub name: String,
     pub metric: Option<Box<ErrorMetric<T>>>,
     pub target_stat: ColumnStat,
+    pub postprocess: Option<std::sync::Arc<dyn Fn(f64) -> f64 + Send + Sync>>,
 }
 
 impl<T> std::fmt::Debug for AccuracyColumn<T> {
@@ -103,6 +133,23 @@ impl<T> AccuracyColumn<T> {
         self.target_stat = stat;
         self
     }
+
+    /// Add a postprocess function to apply to the numerical value in the column.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use reproducible::columns::Column;
+    /// let col = Column::<f64>::accuracy("Mean L2")
+    ///     .postprocess(|val| val * 100.0); // Convert to percentage
+    /// ```
+    pub fn postprocess<F>(mut self, f: F) -> Self
+    where
+        F: Fn(f64) -> f64 + Send + Sync + 'static,
+    {
+        self.postprocess = Some(std::sync::Arc::new(f));
+        self
+    }
 }
 
 impl<T> From<AccuracyColumn<T>> for Column<T> {
@@ -112,15 +159,41 @@ impl<T> From<AccuracyColumn<T>> for Column<T> {
 }
 
 /// A column that reads benchmark data from Criterion.
-#[derive(Debug)]
 pub struct PerformanceColumn {
     pub name: String,
     pub target_stat: ColumnStat,
+    pub postprocess: Option<std::sync::Arc<dyn Fn(f64) -> f64 + Send + Sync>>,
+}
+
+impl std::fmt::Debug for PerformanceColumn {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("PerformanceColumn")
+            .field("name", &self.name)
+            .field("target_stat", &self.target_stat)
+            .finish()
+    }
 }
 
 impl PerformanceColumn {
     pub fn with_stat(mut self, stat: ColumnStat) -> Self {
         self.target_stat = stat;
+        self
+    }
+
+    /// Add a postprocess function to apply to the numerical value in the column.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use reproducible::columns::{Column, PerformanceColumn};
+    /// let col = Column::<f64>::perf("Latency")
+    ///     .postprocess(|val| val / 1000.0);
+    /// ```
+    pub fn postprocess<F>(mut self, f: F) -> Self
+    where
+        F: Fn(f64) -> f64 + Send + Sync + 'static,
+    {
+        self.postprocess = Some(std::sync::Arc::new(f));
         self
     }
 }

@@ -150,10 +150,13 @@ pub fn render_dynamic_markdown<T: Clone>(report: &Report<T>) -> String {
 
                             let stats = Stats::from_metric_values(&results);
                             match stats {
-                                Stats::Numerical(ns) => fmt_float(
-                                    get_stat_val(&Stats::Numerical(ns), ac.target_stat),
-                                    cfg,
-                                ),
+                                Stats::Numerical(ns) => {
+                                    let mut val = get_stat_val(&Stats::Numerical(ns), ac.target_stat);
+                                    if let Some(pp) = &ac.postprocess {
+                                        val = pp(val);
+                                    }
+                                    fmt_float(val, cfg)
+                                }
                                 Stats::Categorical(cs) => format_categorical(&cs),
                             }
                         }
@@ -162,12 +165,15 @@ pub fn render_dynamic_markdown<T: Clone>(report: &Report<T>) -> String {
                     }
                 }
                 Column::Performance(pc) => {
-                    let val = crate::benchmark::extract_criterion_stat_ns_with_id(
+                    let mut val = crate::benchmark::extract_criterion_stat_ns_with_id(
                         row.criterion_root(),
                         row.criterion_id(),
                         pc.target_stat,
                     )
                     .unwrap_or(f64::NAN);
+                    if let Some(pp) = &pc.postprocess {
+                        val = pp(val);
+                    }
                     fmt_time_ns(val)
                 }
                 Column::Custom(_, f) => {
