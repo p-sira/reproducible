@@ -66,6 +66,8 @@ impl<T> Column<T> {
 
     /// Add a postprocess function to apply to the numerical value in the column.
     ///
+    /// The column's postprocessing (if any) is applied *before* the row's postprocessing.
+    ///
     /// # Example
     ///
     /// ```
@@ -136,6 +138,8 @@ impl<T> AccuracyColumn<T> {
 
     /// Add a postprocess function to apply to the numerical value in the column.
     ///
+    /// The column's postprocessing (if any) is applied *before* the row's postprocessing.
+    ///
     /// # Example
     ///
     /// ```
@@ -181,6 +185,8 @@ impl PerformanceColumn {
     }
 
     /// Add a postprocess function to apply to the numerical value in the column.
+    ///
+    /// The column's postprocessing (if any) is applied *before* the row's postprocessing.
     ///
     /// # Example
     ///

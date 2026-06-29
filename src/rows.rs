@@ -24,6 +24,7 @@ pub struct Row<T = f64> {
     criterion_root: Option<PathBuf>,
     criterion_id: Option<String>,
     csv_parser_options: CsvParserOptions,
+    pub postprocess: Option<std::sync::Arc<dyn Fn(f64) -> f64 + Send + Sync>>,
 }
 
 impl<T> Row<T> {
@@ -47,6 +48,7 @@ impl<T> Row<T> {
             criterion_root: None,
             criterion_id: None,
             csv_parser_options: CsvParserOptions::default(),
+            postprocess: None,
         }
     }
 
@@ -63,6 +65,7 @@ impl<T> Row<T> {
             criterion_root: None,
             criterion_id: None,
             csv_parser_options: CsvParserOptions::default(),
+            postprocess: None,
         }
     }
 
@@ -151,6 +154,26 @@ impl<T> Row<T> {
     #[inline]
     pub fn with_criterion_id(mut self, id: impl Into<String>) -> Self {
         self.set_criterion_id(id);
+        self
+    }
+
+    /// Add a postprocess function to apply to all numerical values in this row.
+    ///
+    /// The row's postprocessing is applied *after* the column's postprocessing.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use reproducible::rows::Row;
+    /// let r = Row::<f64>::new("my_row", |i| vec![i[0] * 2.0])
+    ///     .postprocess(|val| val / 100.0);
+    /// ```
+    #[inline]
+    pub fn postprocess<F>(mut self, f: F) -> Self
+    where
+        F: Fn(f64) -> f64 + Send + Sync + 'static,
+    {
+        self.postprocess = Some(std::sync::Arc::new(f));
         self
     }
 }

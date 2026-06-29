@@ -2,7 +2,7 @@
 
 ## 0.4.0
 
-- Postprocess the value for a column, e.g. dividing by the number of elements, using `Column::postprocess`.
+- Postprocess the value for a column or a row, e.g. dividing by the number of elements, using `Column::postprocess` or `Row::postprocess`, accordingly. Row postprocessing is applied after column postprocessing.
 - Extract specific Criterion performance statistics, using `ColumnStat`.
 
 # 0.3

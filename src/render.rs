@@ -156,6 +156,9 @@ pub fn render_dynamic_markdown<T: Clone>(report: &Report<T>) -> String {
                                     if let Some(pp) = &ac.postprocess {
                                         val = pp(val);
                                     }
+                                    if let Some(pp) = &row.postprocess {
+                                        val = pp(val);
+                                    }
                                     fmt_float(val, cfg)
                                 }
                                 Stats::Categorical(cs) => format_categorical(&cs),
@@ -173,6 +176,9 @@ pub fn render_dynamic_markdown<T: Clone>(report: &Report<T>) -> String {
                     )
                     .unwrap_or(f64::NAN);
                     if let Some(pp) = &pc.postprocess {
+                        val = pp(val);
+                    }
+                    if let Some(pp) = &row.postprocess {
                         val = pp(val);
                     }
                     fmt_time_ns(val)
