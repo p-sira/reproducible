@@ -1,5 +1,9 @@
 # 0.3
 
+## 0.3.1
+
+- Support any criterion ID, instead of just restricting to one slash (directory/group).
+
 ## 0.3.0
 
 - `Env`: a struct for extracting and storing environment context for reproducible tests. Also provides `to_string` method.

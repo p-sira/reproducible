@@ -45,20 +45,12 @@ pub fn criterion_estimates_path(
     criterion_root: impl AsRef<Path>,
     group_function: &str,
 ) -> Result<PathBuf, String> {
-    let mut parts = group_function.split('/');
-    let group = parts
-        .next()
-        .ok_or_else(|| "group/function cannot be empty".to_owned())?;
-    let function = parts
-        .next()
-        .ok_or_else(|| "group/function must contain exactly one '/'".to_owned())?;
-    if parts.next().is_some() || group.is_empty() || function.is_empty() {
-        return Err("group/function must be in the form '<group>/<function>'".to_owned());
+    if group_function.is_empty() {
+        return Err("group/function cannot be empty".to_owned());
     }
     Ok(criterion_root
         .as_ref()
-        .join(group)
-        .join(function)
+        .join(group_function)
         .join("new")
         .join("estimates.json"))
 }
