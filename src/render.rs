@@ -151,7 +151,8 @@ pub fn render_dynamic_markdown<T: Clone>(report: &Report<T>) -> String {
                             let stats = Stats::from_metric_values(&results);
                             match stats {
                                 Stats::Numerical(ns) => {
-                                    let mut val = get_stat_val(&Stats::Numerical(ns), ac.target_stat);
+                                    let mut val =
+                                        get_stat_val(&Stats::Numerical(ns), ac.target_stat);
                                     if let Some(pp) = &ac.postprocess {
                                         val = pp(val);
                                     }

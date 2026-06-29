@@ -116,7 +116,7 @@ pub fn extract_criterion_stat_ns_with_id(
                 .map_err(|e| format!("cannot read {}: {e}", path.display()))?;
             let estimates: CriterionEstimates = serde_json::from_str(&content)
                 .map_err(|e| format!("cannot parse criterion JSON: {e}"))?;
-            
+
             Ok(match stat {
                 crate::columns::ColumnStat::Mean => estimates.mean.point_estimate,
                 crate::columns::ColumnStat::Median => estimates.median.point_estimate,
