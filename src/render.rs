@@ -88,6 +88,7 @@ fn get_stat_val(stats: &Stats, stat: ColumnStat) -> f64 {
         Stats::Numerical(ns) => match stat {
             ColumnStat::Mean => ns.mean,
             ColumnStat::Median => ns.median,
+            ColumnStat::Min => ns.min,
             ColumnStat::Max => ns.max,
             ColumnStat::P99 => ns.p99,
             ColumnStat::P95 => ns.p95,
@@ -149,10 +150,17 @@ pub fn render_dynamic_markdown<T: Clone>(report: &Report<T>) -> String {
 
                             let stats = Stats::from_metric_values(&results);
                             match stats {
-                                Stats::Numerical(ns) => fmt_float(
-                                    get_stat_val(&Stats::Numerical(ns), ac.target_stat),
-                                    cfg,
-                                ),
+                                Stats::Numerical(ns) => {
+                                    let mut val =
+                                        get_stat_val(&Stats::Numerical(ns), ac.target_stat);
+                                    if let Some(pp) = &ac.postprocess {
+                                        val = pp(val);
+                                    }
+                                    if let Some(pp) = &row.postprocess {
+                                        val = pp(val);
+                                    }
+                                    fmt_float(val, cfg)
+                                }
                                 Stats::Categorical(cs) => format_categorical(&cs),
                             }
                         }
@@ -160,13 +168,20 @@ pub fn render_dynamic_markdown<T: Clone>(report: &Report<T>) -> String {
                         "N/A".to_string()
                     }
                 }
-                Column::Performance(_) => {
-                    let mean_ns = crate::benchmark::extract_criterion_mean_ns_with_id(
+                Column::Performance(pc) => {
+                    let mut val = crate::benchmark::extract_criterion_stat_ns_with_id(
                         row.criterion_root(),
                         row.criterion_id(),
+                        pc.target_stat,
                     )
                     .unwrap_or(f64::NAN);
-                    fmt_time_ns(mean_ns)
+                    if let Some(pp) = &pc.postprocess {
+                        val = pp(val);
+                    }
+                    if let Some(pp) = &row.postprocess {
+                        val = pp(val);
+                    }
+                    fmt_time_ns(val)
                 }
                 Column::Custom(_, f) => {
                     if let Some(cached) = &cached_results {

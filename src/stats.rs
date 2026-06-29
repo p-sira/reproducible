@@ -9,6 +9,7 @@ pub struct NumericalStats {
     pub mean: f64,
     pub median: f64,
     pub variance: f64,
+    pub min: f64,
     pub max: f64,
     pub p99: f64,
     pub p95: f64,
@@ -131,11 +132,13 @@ impl Stats {
             / n as f64;
 
         let max = *valids.last().unwrap_or(&f64::NAN);
+        let min = *valids.first().unwrap_or(&f64::NAN);
 
         Self::Numerical(NumericalStats {
             mean,
             median,
             variance,
+            min,
             max,
             p99,
             p95,
@@ -157,6 +160,7 @@ mod tests {
             assert_eq!(ns.median, 2.0);
             assert!((ns.p99 - 3.96).abs() < 1e-10);
             assert!((ns.p95 - 3.8).abs() < 1e-10);
+            assert_eq!(ns.min, 1.0);
             assert_eq!(ns.max, 4.0);
         } else {
             panic!("Expected Numerical stats");
