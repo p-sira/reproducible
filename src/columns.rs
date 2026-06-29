@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 pub enum ColumnStat {
     Mean,
     Median,
+    Min,
     Max,
     P99,
     P95,

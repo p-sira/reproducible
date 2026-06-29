@@ -88,6 +88,7 @@ fn get_stat_val(stats: &Stats, stat: ColumnStat) -> f64 {
         Stats::Numerical(ns) => match stat {
             ColumnStat::Mean => ns.mean,
             ColumnStat::Median => ns.median,
+            ColumnStat::Min => ns.min,
             ColumnStat::Max => ns.max,
             ColumnStat::P99 => ns.p99,
             ColumnStat::P95 => ns.p95,
@@ -160,13 +161,14 @@ pub fn render_dynamic_markdown<T: Clone>(report: &Report<T>) -> String {
                         "N/A".to_string()
                     }
                 }
-                Column::Performance(_) => {
-                    let mean_ns = crate::benchmark::extract_criterion_mean_ns_with_id(
+                Column::Performance(pc) => {
+                    let val = crate::benchmark::extract_criterion_stat_ns_with_id(
                         row.criterion_root(),
                         row.criterion_id(),
+                        pc.target_stat,
                     )
                     .unwrap_or(f64::NAN);
-                    fmt_time_ns(mean_ns)
+                    fmt_time_ns(val)
                 }
                 Column::Custom(_, f) => {
                     if let Some(cached) = &cached_results {

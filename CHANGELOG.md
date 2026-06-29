@@ -1,3 +1,9 @@
+# 0.4
+
+## 0.4.0
+
+- Extract specific Criterion performance statistics, using `ColumnStat`.
+
 # 0.3
 
 ## 0.3.1

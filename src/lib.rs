@@ -26,7 +26,10 @@
 //!             .with_metric(metrics::abs_err)
 //!             .with_stat(ColumnStat::Max)
 //!     )
-//!     .with_column(Column::<f64>::perf("Latency"))
+//!     .with_column(
+//!         Column::<f64>::perf("Latency")
+//!             .with_stat(ColumnStat::Mean)
+//!     )
 //!
 //!     // Add rows corresponding to each function you want to evaluate
 //!     .with_row(Row::new("math/add", fn_add).with_test_cases(vec![
