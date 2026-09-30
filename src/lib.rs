@@ -29,20 +29,23 @@
 //!     .with_column(
 //!         Column::<f64>::perf("Latency")
 //!             .with_stat(ColumnStat::Mean)
+//!             .postprocess(|t| t / 2.0) // Divide by the number of test cases
 //!     )
 //!
 //!     // Add rows corresponding to each function you want to evaluate
 //!     .with_row(Row::new("math/add", fn_add).with_test_cases(vec![
 //!         TestCase { inputs: vec![1.0, 2.0], expected: vec![3.0] },
+//!         TestCase { inputs: vec![3.0, 2.0], expected: vec![5.0] },
 //!     ]))
 //!     .with_row(Row::new("math/sub", fn_sub).with_test_cases(vec![
 //!         TestCase { inputs: vec![1.0, 2.0], expected: vec![-1.0] },
+//!         TestCase { inputs: vec![3.0, 2.0], expected: vec![1.0] },
 //!     ]));
 //!
 //! // 3. Render to Markdown and print the testing environment
 //!
 //! println!("{}", report.render_markdown());
-//! # assert!(report.render_markdown() == "| Function | Mean Relative Error (eps) | Max Absolute Error | Latency |\n|----------|---------------------------|--------------------|---------|\n| math/add | 1.33                      | 8.88e-16           | 9.3 ns  |\n| math/sub | 10.00                     | 2.22e-15           | 9.7 ns  |");
+//! # assert!(report.render_markdown() == "| Function | Mean Relative Error (eps) | Max Absolute Error | Latency |\n|----------|---------------------------|--------------------|---------|\n| math/add | 1.07                      | 8.88e-16           | 4.7 ns  |\n| math/sub | 10.00                     | 2.22e-15           | 4.9 ns  |");
 //! println!("Tested on {}", current_env!());
 //! ```
 //!
@@ -50,8 +53,8 @@
 //! ```text
 //! | Function | Mean Relative Error (eps) | Max Absolute Error | Latency |
 //! |----------|---------------------------|--------------------|---------|
-//! | math/add | 1.33                      | 8.88e-16           | 9.3 ns  |
-//! | math/sub | 10.00                     | 2.22e-15           | 9.7 ns  |
+//! | math/add | 1.07                      | 8.88e-16           | 1.3 ns  |
+//! | math/sub | 10.00                     | 2.22e-15           | 1.3 ns  |
 //!
 //! Tested on AMD Ryzen 5 4600H with Radeon Graphics @2.4 GHz RAM 16 GB running x86_64-unknown-linux-gnu rustc 1.90.0 using reproducible v0.2.0
 //! ```

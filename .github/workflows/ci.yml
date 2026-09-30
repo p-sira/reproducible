@@ -22,7 +22,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Run clippy
         run: cargo clippy --workspace --all-targets -- -D warnings
       - name: Test workspace
@@ -34,11 +34,11 @@ jobs:
 
   format:
     needs: test
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Format code
-        if: github.event_name == 'push'
         run: |
           BRANCH=$(echo "${{ github.ref }}" | sed 's|refs/heads/||')
           cargo fmt --all
