@@ -1,5 +1,9 @@
 # 0.4
 
+## 0.4.1
+
+- Upgrade `tabled` to 0.22.0.
+
 ## 0.4.0
 
 - Postprocess the value for a column or a row, e.g. dividing by the number of elements, using `Column::postprocess` or `Row::postprocess`, accordingly. Row postprocessing is applied after column postprocessing.
